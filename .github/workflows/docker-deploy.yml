@@ -1,0 +1,37 @@
+name: Docker Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  DOCKER_HUB_USERNAME: marvinboris
+  DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+  IMAGE_NAME: kafka-test
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Deploy Docker image
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            docker stop kafka-test || true
+            docker rm kafka-test || true
+            docker pull ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            docker run -d --restart always -p 3000:3000 --env-file .env --name kafka-test ${{ env.IMAGE_NAME }}:${{ github.sha }}

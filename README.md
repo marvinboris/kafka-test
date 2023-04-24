@@ -60,8 +60,7 @@ Request Body:
 ```
 {
   "name": "Task name",
-  "description": "Task description",
-  "status": "pending"
+  "status": "TODO"
 }
 ```
 
@@ -82,7 +81,7 @@ Request Body:
 ```
 {
   "name": "Updated task name",
-  "status": "completed"
+  "status": "TODO"
 }
 ```
 
